@@ -1,0 +1,41 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/FundMe.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.18;\n\nimport \"@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol\";\nimport \"./PriceConverter.sol\";\n\ncontract FundMe\n{\n    using PriceConverter for uint;\n\n    uint public constant MINIMUM_USD = 50*10**18;\n    address[] public funders;\n    mapping (address => uint) public addressToAmountFunded;\n\n    address public owner;\n\n    //now making changes coz we are being fundMe to hardhat\n    //watch at around 10:25:00\n    AggregatorV3Interface public priceFeed;\n\n    constructor(address priceFeedAddress)           //jabbhi deploy krte hain contract waise hi sbse pehle constructor call hota hain , to jaise hi sbse pehle jisne deploy kiya usi ko apan owner set kr diye\n    {\n        owner = msg.sender;\n        priceFeed = AggregatorV3Interface(priceFeedAddress);\n    }\n\n    modifier onlyOwner\n    {\n        require(msg.sender == owner,\"You are not the owner.\");\n        _;\n    }\n\n    function fund() public payable \n    {\n        require(msg.value.getConversionRate(priceFeed) >= MINIMUM_USD, \"You need to spend more ETH!!\");      //equal to getConversionRate(msg.value) , kyunki library se extract kr rahe na function , to msg.value will already be considered as the first parameter to getConversionRate\n\n        funders.push(msg.sender);\n        addressToAmountFunded[msg.sender] += msg.value;\n    }\n\n    function withDrawAll() public onlyOwner// contract me bhej to koi bhi skta lekin withdraw sirf owner kr skta jisne deploy kiya contract , sbse pehle msg.sender ko hi apan owner banane waale hain constructor ki madad se\n    {\n        for(uint index=0; index<funders.length; index++)\n        {\n            address funderAddress = funders[index];\n            addressToAmountFunded[funderAddress] = 0;\n        }\n        //'funders' array se saare funders uthaaye ek ek kr k , unka address store krte gye 'funderAddress' me aur waha se mapping wali chiz me amount funded by that specific address '0' krte gye\n\n        //resetting the array kyunki abto saare funders khatam , sbke paise utha liye apan ne\n        funders = new address[](0); \n\n        //lekin abhi tk actual paise to transfer kiye hi nhi , chaahe to .send ya .transfer() use kr skte the  .... watch at around 4:53:00\n\n        (bool callSuccess, ) = payable (owner).call{value: address(this).balance}(\"\");\n        require(callSuccess, \"Call Failed\");\n    }\n}"
+    },
+    "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ninterface AggregatorV3Interface {\n  function decimals() external view returns (uint8);\n\n  function description() external view returns (string memory);\n\n  function version() external view returns (uint256);\n\n  // getRoundData and latestRoundData should both raise \"No data present\"\n  // if they do not have data to report, instead of returning unset values\n  // which could be misinterpreted as actual reported values.\n  function getRoundData(uint80 _roundId)\n    external\n    view\n    returns (\n      uint80 roundId,\n      int256 answer,\n      uint256 startedAt,\n      uint256 updatedAt,\n      uint80 answeredInRound\n    );\n\n  function latestRoundData()\n    external\n    view\n    returns (\n      uint80 roundId,\n      int256 answer,\n      uint256 startedAt,\n      uint256 updatedAt,\n      uint80 answeredInRound\n    );\n}\n"
+    },
+    "contracts/PriceConverter.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.18;\n\nimport \"@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol\";\n\nlibrary PriceConverter\n{\n    function getPrice(AggregatorV3Interface priceFeed) internal view returns (uint)            //library me har function me internal dena hota\n    {\n        //  AggregatorV3Interface priceFeed = AggregatorV3Interface(\n        //     0x694AA1769357215DE4FAC081bf1f309aDC325306\n        // );\n\n        //ye upar wala code aur address aggregator k andr jo that wo shi tha sirf sepolia k liye, abhi humne constructor me address pass kiya hain jis bhi chain ka chahiye fundMe k andar aur \n        //waha se yaha getConversion me bheja phir getPrice me ab yaha se priceFeed ko neeche use kr k uss chain k hisaab se price nikal liya\n\n        (, int256 answer, , , ) = priceFeed.latestRoundData();\n        // ETH/USD rate in 18 digit\n        return uint256(answer * 10000000000);\n    }\n\n    function getConversionRate(uint ethAmount , AggregatorV3Interface priceFeed) internal view returns(uint)\n    {\n        uint ethPrice = getPrice(priceFeed);\n        uint ethAmountInUSD = (ethPrice * ethAmount) / 1000000000000000000;\n\n        return ethAmountInUSD;\n\n    }\n    \n}\n\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
