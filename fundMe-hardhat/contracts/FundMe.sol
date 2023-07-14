@@ -30,6 +30,18 @@ contract FundMe
         _;
     }
 
+
+    receive() external payable {
+        fund();
+    }
+
+    fallback() external payable {
+        fund();
+    }
+
+
+
+
     function fund() public payable 
     {
         require(msg.value.getConversionRate(priceFeed) >= MINIMUM_USD, "You need to spend more ETH!!");      //equal to getConversionRate(msg.value) , kyunki library se extract kr rahe na function , to msg.value will already be considered as the first parameter to getConversionRate

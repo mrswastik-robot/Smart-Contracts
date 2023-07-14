@@ -5,11 +5,12 @@ const {deployments, ethers , getNamedAccounts} = require("hardhat");
 //yaad kro getNamedAccounts() se hume deployer milta hai aur ise ham hre se import krte the yaha hardhat se kr lenge
 
 
-describe("FundMe", () => { 
+describe("FundMe", function()  { 
 
     let fundme;
     let deployer;
     let mockV3Aggregator;
+    const sendValue = ethers.utils.parseEther("1")   //did this instead of writing 1000000000000000000
 
     //sbse pehle to deploy krna padega, simpleStorage me contractFactory se deploy kr dete the lekin hamne iss project me hardhat-deploy use krna hain na
 
@@ -20,7 +21,7 @@ describe("FundMe", () => {
         //upar wala code bhi kaam kr skta par we are going with the following
 
         // const {deployer} = await getNamedAccounts();     // ye kisi variable me store karana padega taki hume baad me use kr sake
-        deployer = await (getNamedAccounts()).deployer;
+        deployer = (await getNamedAccounts()).deployer;
         await deployments.fixture(["all"]);    //this will deploy the all the contracts inside deploy folder with 'all' tag
         fundme = await ethers.getContract("FundMe" , deployer);   //this will get the most recently deployed 'FundMe' contract with name FundMe
         mockV3Aggregator = await ethers.getContract("MockV3Aggregator" , deployer);
@@ -37,10 +38,22 @@ describe("FundMe", () => {
 
 
     describe("fund" , async function ()  {
+
         it("Fails if you don't send enough eth" , async function() {
             await expect(fundme.fund()).to.be.revertedWith("You need to spend more ETH!!");  
-        }
-        );
+        });
+
+        it("Updates the mapping correctly" , async function() {
+            await fundme.fund({value : sendValue});
+            const response = await fundme.addressToAmountFunded(deployer);
+            assert.equal(response.toString() , sendValue.toString());
+        });
+
+        it("Add the funders to the array of funders" , async function() {
+            await fundme.fund({value : sendValue});
+            const response = await fundme.funders(0);
+            assert.equal(response , deployer);
+        });
 
     })
 
