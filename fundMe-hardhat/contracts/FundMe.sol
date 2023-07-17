@@ -67,4 +67,21 @@ contract FundMe
         (bool callSuccess, ) = payable (owner).call{value: address(this).balance}("");
         require(callSuccess, "Call Failed");
     }
+
+    //watch at 11:52:00
+    //this withDrawAll function is playing too much with storage variables hence taking alot of gas , so we will make a new function which will be more efficient
+    function cheaperWithDrawAll () public onlyOwner
+    {
+        address[] memory m_funders = funders;           //we will read this 'funders' array from storage and store it in memory for less gas usage
+        
+        for(uint index=0; index<m_funders.length; index++)       //now instead of using storgae variable 'funders' , we will use memory variable 'm_funders'
+        {
+            address funderAddress = m_funders[index];
+            addressToAmountFunded[funderAddress] = 0;
+        }
+
+        funders = new address[](0);
+        (bool callSuccess, ) = payable (owner).call{value: address(this).balance}("");
+        require(callSuccess, "Call Failed");
+    }
 }
