@@ -94,6 +94,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
      * earlier we named performUpKeep as requestRandomWinner , but now we are gonna change it to performUpKeep coz we are gonna use the keeper network to automate the process of picking a winner from time to time so that we don't have to do anything manually
      */
 
+//checkUpkeep() is the function that basically going to check whether it is the time to get a random number to update the recent winner and send them all funds and then pickANewWinner function now known as performUpKeep will come into play
     function checkUpkeep(  bytes memory /*checkData*/)
         public      //earlier it was external but we changed it to public , so that we can call it from the inside of the contract , external function can only be called from outside the contract
         view
@@ -109,6 +110,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         return (upkeepNeeded , "0x0");
     }
 
+    //this performUpkeep() was earlier called requestRandomWinner() , but now we are gonna change it to performUpKeep coz we are gonna use the keeper network to automate the process of picking a winner from time to time so that we don't have to do anything manually
     function performUpkeep(bytes calldata /*performData*/) external override {
 
         (bool upkeepNeeded, ) = checkUpkeep("");
@@ -172,6 +174,25 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     function getRecentWinner() public view returns (address) {
         return s_recentWinner;
     }
+
+    function getRaffleState() public view returns (RaffleState) {
+        return s_raffleState;
+    }
+
+    function getNumWords() public pure returns (uint256) {      //numwords is a constant , so we are making it pure
+        return NUM_WORDS;
+    }
+
+    function getRequestConfirmations() public pure returns(uint256)
+    {
+        return REQUEST_CONFIRMATIONS;
+    }
+
+    function getLastTimeStamp () public view returns (uint256) {
+        return s_lastTimeStamp;
+    }
+
+    
 
     // function checkUpkeep(
     //     bytes calldata checkData
