@@ -45,9 +45,9 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
 
     constructor(
         address vrfCoordinatorV2,
+        uint64 subscriptionId,
         uint256 entranceFee,
         bytes32 gasLane,
-        uint64 subscriptionId,
         uint32 callbackGasLimit,
         uint256 interval // how long you wanna wait for the chainlink automation to pick a winner in set intervals
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
