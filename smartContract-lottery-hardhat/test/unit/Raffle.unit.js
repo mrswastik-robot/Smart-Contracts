@@ -1,6 +1,8 @@
-const { assert, expect } = require("chai")
+const { assert, expect  } = require("chai")
 const { network, deployments, ethers } = require("hardhat")
 const { developmentChains, networkConfig } = require("../../helper-hardhat-config")
+
+const {solidity} = require("ethereum-waffle")
 
 !developmentChains.includes(network.name)
     ? describe.skip
@@ -28,7 +30,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   assert.equal(raffleState, "0")
                   assert.equal(
                       interval.toString(),
-                      networkConfig[network.config.chainId]["keepersUpdateInterval"]
+                      networkConfig[network.config.chainId]["interval"]
                   )
               })
           })
@@ -36,7 +38,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           describe("enterRaffle", function () {
               it("reverts when you don't pay enough", async () => {
                   await expect(raffle.enterRaffle()).to.be.revertedWith( // is reverted when not paid enough or raffle is not open
-                      "Raffle__SendMoreToEnterRaffle"
+                      "Raffle__NotEnoughETHEntered"
                   )
               })
               it("records player when they enter", async () => {
@@ -155,6 +157,9 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   await new Promise(async (resolve, reject) => {
                       raffle.once("WinnerPicked", async () => { // event listener for WinnerPicked
                           console.log("WinnerPicked event fired!")
+
+                          //jab WinnerPicked event fire ho chuka hoga tabbhi hame recentWinner jaisi values mil paayegi to wait kro WinnerPicked event k fire hone ka
+
                           // assert throws an error if it fails, so we need to wrap
                           // it in a try/catch so that the promise returns event
                           // if it fails.
@@ -185,6 +190,8 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                           }
                       })
 
+                      //outside the listener but inside the promise , we are firing the event that the listener above is listening to , aur uske baad hi to use value milri hai like recentWinner, raffleState, winnerBalance, endingTimeStamp
+                      //fulfillRandomWords is a function jikse andar hi WinnerPicked event fire ho raha hai
                       // kicking off the event by mocking the chainlink keepers and vrf coordinator
                       try {
                         const tx = await raffle.performUpkeep("0x")

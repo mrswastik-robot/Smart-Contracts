@@ -5,6 +5,8 @@ require("solidity-coverage")
 require("hardhat-gas-reporter")
 require("hardhat-contract-sizer")
 require("dotenv").config()
+// require("@nomicfoundation/hardhat-chai-matchers");       // won't work with waffle parallely installed
+
 
 
 
@@ -24,6 +26,11 @@ module.exports = {
       chainId: 11155111,
       blockConfirmations: 5,
     },
+    // gasReporter: {
+    //   // currency: 'USD',
+    //   // gasPrice: 100,
+    //   enabled: false,
+    // },
 
     localhost: {
       url: "http://127.0.0.1:8545/",
@@ -36,6 +43,7 @@ module.exports = {
   namedAccounts: {
     deployer: {
       default: 0,
+      1: 0,
     },
     player1: {
       default: 1,
