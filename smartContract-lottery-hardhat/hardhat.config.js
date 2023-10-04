@@ -5,6 +5,8 @@ require("solidity-coverage")
 require("hardhat-gas-reporter")
 require("hardhat-contract-sizer")
 require("dotenv").config()
+
+require("@nomiclabs/hardhat-ethers")
 // require("@nomicfoundation/hardhat-chai-matchers");       // won't work with waffle parallely installed
 
 

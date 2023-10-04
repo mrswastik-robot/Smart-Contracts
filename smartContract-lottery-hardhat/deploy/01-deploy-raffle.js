@@ -45,6 +45,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     if (networkConfig[chainId]) {
         config = networkConfig[chainId];
         console.log(config);
+        console.log('checking testing')
+        console.log(chainId);
       } else {
         config = {}; // default config
         console.log('bhakkk jaaa');
@@ -86,6 +88,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     }
 
     log('-------------------------------------');
+
+    //returning raffle for update front end.js
+    return raffle;
 
 }
 
