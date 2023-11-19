@@ -10,7 +10,7 @@ const ManualHeader = () => {
 
         if (isWeb3Enabled) return;
 
-        //on refreshing the page, disconnection from the metamask happens
+        //on refreshing the page, disconnection from the metamask happens, to ab check kr rhe localstorage me , aur phir automatically enable web3 run kr rhe when refreshing the page
         if(window.localStorage.getItem('connected') === 'injected'){
             enableWeb3()
         }
@@ -30,7 +30,7 @@ const ManualHeader = () => {
                 console.log("Null Account found.")
             }
         })
-    })
+    }, [])
 
 
   return (

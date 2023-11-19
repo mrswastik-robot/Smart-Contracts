@@ -13,21 +13,18 @@ export default function LotteryEntrance() {
     const dispatch = useNotification();
 
     const {chainId: chainIdHex , isWeb3Enabled} = useMoralis();
-    // console.log(parseInt(chainIdHex));
     const chainId = parseInt(chainIdHex);
     // console.log(chainId);
-    // console.log(contractAddresses); 
 
     const [entranceFee , setEntranceFee] = useState('0');
-    // const [raffleAddress, setRaffleAddress] = useState(null);
+    const [numberOfPlayers , setNumberOfPlayers] = useState('0');
+    const [recentWinner , setRecentWinner] = useState('0');
 
-    // if(chainId)
-    // {
+
         const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0]: null;
-        // const raffleAddress = !isNaN(chainId) && contractAddresses?.[chainId]?.[0] || null;
         console.log(raffleAddress);
 
-    // }
+    
 
     // useEffect(() => {
     //     if (!isNaN(chainId)) {
@@ -81,10 +78,15 @@ export default function LotteryEntrance() {
             async function updateUI()
             {
                 const entranceFeeFromCall = (await gettingEntranceFee()).toString();
-                // setEntranceFee(ethers.utils.formatUnits(entranceFeeFromCall, 'ether'));     //earlier it was showing 10^18 wei , now it will show in ether format
-                setEntranceFee(entranceFeeFromCall);
-                console.log(entranceFee);
                 //now that we have got entranceFee , we can run the enterRaffle function
+                console.log(entranceFeeFromCall);
+                setEntranceFee(entranceFeeFromCall);
+
+                const numPlayersFromCall = (await gettingPlayersNumber()).toString();
+                const recentWinnerFromCall = (await gettingRecentWinner());
+                setNumberOfPlayers(numPlayersFromCall);
+                setRecentWinner(recentWinnerFromCall);
+
             }
 
 
@@ -130,7 +132,7 @@ export default function LotteryEntrance() {
 
             {
                 raffleAddress ? (
-                    <div>
+                    <div className=" space-y-2">
                         <p>Entrance Fee: {ethers.utils.formatUnits(entranceFee , 'ether')}ETH</p>
                         <button 
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
@@ -145,6 +147,9 @@ export default function LotteryEntrance() {
                                 {isFetching || isLoading ? 
                                 (<div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>) : ("Enter Raffle")}
                             </button>
+
+                            <div>The current number of players is: {numberOfPlayers}</div>
+                            <div>The most previous winner was: {recentWinner}</div>
                     </div>
                 ) : (<h1>No Raffle Address Detected</h1>)
             }
